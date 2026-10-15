@@ -284,3 +284,20 @@ The `output_data/` directory must exist before running the script because the cu
 
 Users should review the NRFA information for station 69007 before interpreting the SSI demonstration. The station record includes information about measurement changes and factors affecting runoff.
 
+## Citation
+
+If you use this repository, please cite the associated study:
+
+```text
+Armitage, R., Magee, E., Chevuturi, A., Chan, W., and Hannaford, J. (2026).
+Historical and future transitions between opposing UK hydrological extremes.
+HESS, https://doi.org/10.5194/egusphere-2026-3154
+```
+
+## Licence
+
+This project is distributed under the terms of the GNU General Public License.
+
+See the `LICENSE` file for the complete licence terms.
+
+## Acknowledgements

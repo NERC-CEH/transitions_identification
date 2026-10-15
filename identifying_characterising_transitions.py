@@ -24,9 +24,9 @@ Severe = 1.6
 Extreme = 2
 
 # set paths
-inpath = '/path/to/eFLaG/SSI/' # location of standardised data directory
-outpath_t = '/path/to/outputs/TransitionEventsData/' # location to save transitions data to
-eflag_metadata_path = '/path/to/metadata/eflag_lat_long_full.csv'
+inpath = 'input_data/SSI/' # location of standardised data directory
+outpath_t = 'output_data/SSI/TransitionEventsData/' # location to save transitions data to
+eflag_metadata_path = 'input_data/eflag_lat_long_69007.csv'
 
 
 ### transition identification and characterisation ###

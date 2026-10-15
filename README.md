@@ -245,10 +245,6 @@ Alternative formats require corresponding changes to the data-import section.
 
 The `output_data/` directory must exist before running the script because the current implementation does not create it automatically.
 
-### Station and flow-record information
-
-Users should review the NRFA information for station 69007 before interpreting the SSI demonstration. The station record includes information about measurement changes and factors affecting runoff.
-
 ## Citation
 
 If you use this repository, please cite the associated study:

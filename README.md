@@ -9,12 +9,20 @@ Schematic below demonstrates visually how the workflow identifies the extreme ev
 
 <img width="1465" height="727" alt="image" src="https://github.com/user-attachments/assets/4d1e3029-cf6a-46b7-bb70-179b1fb38d45" />
 
-This repository provides a Python tool for identifying and characterising transitions between opposing dry and wet hydroclimatic extremes using standardised indicators: Standardised Streamflow Index (SSI) and Standardised Precipitation Index (SPI). The repository demonstrates the workflow using and example catchment ([69007 - Mersey at Ashton Weir](https://nrfa.ceh.ac.uk/data/station/info/69007)) with SSI data. The catchment is used to demonstrate how the transition-identification workflow can be applied consistently to streamflow (hydrological) and precipitation (meteorological) indicators. The dataset used here is the one model and one realisation for the future projections [enhanced future Flows and Groundwater (eFLaG) dataset](https://doi.org/10.5194/essd-15-2391-2023), with the standardised indicators [available here](https://zenodo.org/records/23339444). 
+This repository provides a Python tool for identifying and characterising transitions between opposing dry and wet hydroclimatic extremes using standardised indicators: Standardised Streamflow Index (SSI) and Standardised Precipitation Index (SPI). 
+
+- **SSI transitions** represent `transitions` between *hydrological* dry and wet extremes in standardised streamflow.
+- **SPI transitions** represent `transitions` between *meteorological* dry and wet extremes in standardised precipitation.
+
+
+The repository demonstrates the workflow using and example catchment ([69007 - Mersey at Ashton Weir](https://nrfa.ceh.ac.uk/data/station/info/69007)) with SSI data. The catchment is used to demonstrate how the transition-identification workflow can be applied consistently to streamflow (hydrological) and precipitation (meteorological) indicators. The dataset used here is the one model and one realisation for the future projections [enhanced future Flows and Groundwater (eFLaG) dataset](https://doi.org/10.5194/essd-15-2391-2023), with the standardised indicators [available here](https://zenodo.org/records/23339444). 
 
 
 ## Method overview
 
-The `identifying_characterising_transitions.py` script identifies individual wet and dry extremes using a peaks-over-threshold approach implemented through the `pyextremes` package. Three severity thresholds are available:
+The script identifies individual wet and dry extremes using a peaks-over-threshold approach implemented through the `pyextremes` package.
+
+Three severity thresholds are available:
 
 | Classification | Standardised threshold |
 |---|---:|
@@ -22,16 +30,18 @@ The `identifying_characterising_transitions.py` script identifies individual wet
 | Severe | ±1.6 |
 | Extreme | ±2.0 |
 
-Values above the positive threshold are classified as wet extremes, while values below the corresponding negative threshold are classified as dry extremes. After identifying the extremes, the script orders them chronologically. A transition is recorded when two consecutive extreme events have different states:
+Values above the positive threshold are classified as wet extremes, while values below the corresponding negative threshold are classified as dry extremes.
 
-- `dry` followed by `wet`
-- `wet` followed by `dry`
+After identifying the extremes, the script orders them chronologically. A transition is recorded when two consecutive extreme events have opposing states:
+
+- dry followed by wet
+- wet followed by dry
 
 The transition starts at the last identified extreme of the initial state and ends at the first identified extreme of the opposite state.
 
 ## Transition characteristics
 
-For each transition, the script records the following information:
+For each identified transition, the script records:
 
 | Variable | Description |
 |---|---|
@@ -44,17 +54,15 @@ For each transition, the script records the following information:
 | `Duration` | Number of months between the start and end dates |
 | `Intensity` | Transition magnitude divided by duration |
 
-The transition metrics are calculated as:
+The metrics are calculated as:
 
 ```text
 Magnitude = |StartVal - EndVal|
-
 Duration = EndDate - StartDate
-
 Intensity = Magnitude / Duration
 ```
 
-The transition frequency is reported as the number of identified transitions per decade:
+Transition frequency is calculated as the number of identified transitions per decade:
 
 ```text
 Frequency = Number of transitions / Record length in decades
@@ -68,68 +76,85 @@ Frequency = Number of transitions / Record length in decades
 ├── LICENSE
 ├── requirements.txt
 ├── identify_characterise_transitions.py
-├── data/
-│   ├── SSI/
-│   │   └── 69007/
-│   │       └── SSI_example.csv
-│   ├── SPI/
-│   │   └── 69007/
-│   │       └── SPI_example.csv
-│   └── metadata/
-│       └── catchment_metadata.csv
-└── outputs/
-    ├── SSI/
-    └── SPI/
+├── input_data/
+│   ├── example_ssi_69007.csv
+│   ├── example_spi_69007.csv
+│   └── eflag_lat_long_69007.csv
+└── output_data/
 ```
 
-The exact folder structure can be adapted, but the input and output paths in the script must be updated accordingly.
+The script expects input files in the `input_data/` directory and writes outputs to the `output_data/` directory.
 
 ## Requirements
 
-The workflow requires Python 3 and can be installed using:
+The workflow requires Python 3. Install the required packages using:
 
 ```bash
 pip install -r requirements.txt
 ```
 
+The script depends primarily on:
+
+- `pandas`
+- `pyextremes`
+
 ## Input data
 
-The transition-identification function expects a CSV file (with SPI or SSI) containing:
+## Input data
+
+The transition-identification function expects a CSV file containing either SSI or SPI values with:
 
 1. A monthly date column.
-2. Different columns of standardised indicator accumulations columns (X1 - X24). For example, `X3` represents a three-month accumulation period.
+2. Columns containing standardised indicator values for different accumulation periods.
 
-In the current script, the date column is read as `Unnamed: 0`, renamed to `MONTH`, and converted to a monthly datetime index.
+The accumulation columns should follow the naming convention `X1`, `X3`, `X6`, and so on. For example, `X3` represents a three-month accumulation period. The current script assumes that:
+
+- the date column is named `Unnamed: 0`;
+- the date column contains monthly timestamps;
+- the accumulation columns follow the format `X1`, `X3`, `X6`, etc.
+
+The script renames `Unnamed: 0` to `MONTH` and converts it to a datetime index.
 
 ## Configuration
 
-Before running the script, update the input, output and metadata paths:
+The default paths are:
 
 ```python
-inpath = "/path/to/input/data/"
-outpath_t = "/path/to/outputs/TransitionEventsData/"
-eflag_metadata_path = "/path/to/metadata/eflag_lat_long_full.csv"
+inpath = 'input_data/'
+outpath_t = 'output_data/'
 ```
+No changes are required if the input files are stored in `input_data/` and the `output_data/` directory already exists.
 
-The current implementation is configured for the eFLaG SSI dataset and includes the following hydrological models:
+The transition thresholds are defined in the script as:
 
 ```python
-models = ["GR4J", "GR6J", "PDM", "G2G"]
+Moderate = 1
+Severe = 1.6
+Extreme = 2
 ```
 
-It also supports 12 regional climate model simulations:
+These thresholds are applied symmetrically to identify wet and dry extremes.
+
+## Running the transition extraction
+
+The main function is:
 
 ```python
-rcms = [
-    "RCM1", "RCM2", "RCM3", "RCM4",
-    "RCM5", "RCM6", "RCM7", "RCM8",
-    "RCM9", "RCM10", "RCM11", "RCM12"
-]
+extract_transitions(filename, threshold, acc=3)
 ```
 
-These model and simulation lists can be modified when applying the method to other datasets, including the demonstration SSI and SPI data for station 69007.
+or run the script directly with changes as needed:
 
-The output directories for each threshold and accumulation period must exist before the script is run. For example:
+```python 
+extract_transitions(filename, threshold, acc=3)
+```
+
+### Parameters
+
+- `filename`: Name of the input SSI or SPI CSV file located in `input_data/`.
+- `threshold`: Transition severity classification. Accepted values are `Moderate`, `Severe`, and `Extreme`.
+- `acc`: Accumulation period of the standardised indicator. The default is `3`.
+
 
 ```text
 outputs/

@@ -7,14 +7,7 @@
 """
 
 import pandas as pd
-#from os import listdir
 from pyextremes import get_extremes
-#import matplotlib.pyplot as plt
-#from pyextremes.plotting import plot_extremes
-
-# define models and rcms
-models = ['GR4J','GR6J','PDM','G2G'] # models in eflag
-rcms = ['RCM1','RCM2','RCM3','RCM4','RCM5','RCM6','RCM7','RCM8','RCM9','RCM10','RCM11','RCM12'] # rcms in eflag
 
 # set thresholds 
 # thresholds applied to standardised data to identify transitions between extremes
@@ -65,8 +58,6 @@ def extract_transitions(filename, threshold, acc=3):
 
     f = inpath + filename # path to SSI/SPI data for specific model/rcm
                 
-    # = [f for f in listdir(infold) if f.endswith('.csv')]
-    
     # empty lists for summary data
     MagAvg = []
     DurAvg = []
@@ -90,10 +81,6 @@ def extract_transitions(filename, threshold, acc=3):
     ### identify individual extreme events ###
     wets = get_extremes(SSI3, 'POT', threshold=eval(UseThreshold))
     drys = get_extremes(SSI3, 'POT', 'low', threshold=-eval(UseThreshold))
-
-    # plot extremes 
-    # plot_extremes(SSI3, wets, "POT", "high")
-    # plot_extremes(SSI3, drys, "POT", "low")
 
     # join wet and dry events
     wets = wets.to_frame()
@@ -199,11 +186,10 @@ def extract_transitions(filename, threshold, acc=3):
     TransitionsSummary = pd.DataFrame(list(zip(MagAvg, DurAvg, InteAvg, Frequency, CountSum)),
                                    columns = ['Magnitude', 'Duration', 'Intensity','Frequency', 'Count'])
     
-    # save summary data with locations
-    # csv per accumulation, threshold, model, rcm combination
+    # save summary data as a csv file
     TransitionsSummary.to_csv(outpath_t + filename[:-4] + '_TransitionsSummary.csv', index=False)
 
 
 #Example to run the code
-
+#Please change filename/Threshold/Accumulation as needed
 extract_transitions('example_ssi_69007.csv', 'Moderate', acc=3)

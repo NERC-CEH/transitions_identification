@@ -9,12 +9,6 @@ Schematic below demonstrates visually how the workflow identifies the extreme ev
 
 The repository demonstrates the workflow using and example catchment ([69007 - Mersey at Ashton Weir](https://nrfa.ceh.ac.uk/data/station/info/69007)) Standardised Streamflow Index (SSI) and Standardised Precipitation Index (SPI) data. The catchment is used to demonstrate how the transition-identification workflow can be applied consistently to streamflow (hydrological) and precipitation (meteorological) indicators. The dataset used here is the one model and one realisation for the future projections [enhanced future Flows and Groundwater (eFLaG) dataset](https://doi.org/10.5194/essd-15-2391-2023), with the standardised indicators [available here]([https://www.ceh.ac.uk/our-science/projects/eflag-enhanced-future-flows-and-groundwater](https://zenodo.org/records/23339444)). 
 
-The same conceptual method demonstrated in this repo can applied to both indicators:
-
-- **SSI transitions** represent transitions between `hydrological` dry and wet extremes in standardised streamflow.
-- **SPI transitions** represent transitions between `meteorological` dry and wet extremes in standardised precipitation.
-
-The attached script currently uses SSI-specific variable names, directory names and output filenames. To apply it to SPI, these elements should be generalised or replaced with the corresponding SPI names. The threshold definitions and transition metrics remain the same because both SSI and SPI are standardised indicators.
 
 ## Method overview
 
@@ -72,11 +66,18 @@ Frequency = Number of transitions / Record length in decades
 ├── LICENSE
 ├── requirements.txt
 ├── identify_characterise_transitions.py
-├── input_data/
-    └── example_ssi_69007.csv
-└── output_data/
-    ├── example_ssi_69007_TransitionsEvents.csv
-    └── example_ssi_69007_TransitionsSummary.csv
+├── data/
+│   ├── SSI/
+│   │   └── 69007/
+│   │       └── SSI_example.csv
+│   ├── SPI/
+│   │   └── 69007/
+│   │       └── SPI_example.csv
+│   └── metadata/
+│       └── catchment_metadata.csv
+└── outputs/
+    ├── SSI/
+    └── SPI/
 ```
 
 The exact folder structure can be adapted, but the input and output paths in the script must be updated accordingly.
@@ -88,80 +89,103 @@ The workflow requires Python 3 and can be installed using:
 ```bash
 pip install -r requirements.txt
 ```
-The script depends primarily on `pandas` and `pyextremes` packages.
 
 ## Input data
 
 The transition-identification function expects a CSV file (with SPI or SSI) containing:
 
 1. A monthly date column.
-2. Standardised indicator accumulations (X1–X24).
+2. Different columns of standardised indicator accumulations columns (X1 - X24). For example, `X3` represents a three-month accumulation period.
 
-In the current script, the date column is named Unnamed: 0; the date column contains monthly timestamps; accumulation columns follow the format X1, X3, X6, etc. The included examples use SSI data for NRFA catchment 69007 – Mersey at Ashton Weir.
+In the current script, the date column is read as `Unnamed: 0`, renamed to `MONTH`, and converted to a monthly datetime index.
 
 ## Configuration
 
-Before running the script, update the input and output paths:
+Before running the script, update the input, output and metadata paths:
 
 ```python
-inpath = 'input_data/'
-outpath_t = 'output_data/'
+inpath = "/path/to/input/data/"
+outpath_t = "/path/to/outputs/TransitionEventsData/"
+eflag_metadata_path = "/path/to/metadata/eflag_lat_long_full.csv"
 ```
 
-For most users, no modification is required provided the input files are placed in the input_data/ directory.
+The current implementation is configured for the eFLaG SSI dataset and includes the following hydrological models:
 
-Transition severity thresholds are defined as:
-- Moderate = 1.0
-- Severe = 1.6
-- Extreme = 2.0
-These thresholds are applied symmetrically to identify both wet and dry extremes.
+```python
+models = ["GR4J", "GR6J", "PDM", "G2G"]
+```
+
+It also supports 12 regional climate model simulations:
+
+```python
+rcms = [
+    "RCM1", "RCM2", "RCM3", "RCM4",
+    "RCM5", "RCM6", "RCM7", "RCM8",
+    "RCM9", "RCM10", "RCM11", "RCM12"
+]
+```
+
+These model and simulation lists can be modified when applying the method to other datasets, including the demonstration SSI and SPI data for station 69007.
+
+The output directories for each threshold and accumulation period must exist before the script is run. For example:
+
+```text
+outputs/
+└── TransitionEventsData/
+    ├── Moderate/
+    │   └── SSI3/
+    ├── Severe/
+    │   └── SSI3/
+    └── Extreme/
+        └── SSI3/
+```
 
 ## Running the transition extraction
 
 The main function has the following form:
 
 ```python
-extract_transitions(filename, threshold, acc=3)
+extract_transitions(model, rcm, threshold, acc=3)
 ```
 
 ### Parameters
-- `filename` – Input SSI or SPI CSV file.
-- `threshold` – One of Moderate, Severe, or Extreme.
-- `acc` – Accumulation period (default = 3).
+
+- `model`: Hydrological model name.
+- `rcm`: Regional climate model simulation name.
+- `threshold`: Transition severity classification. Accepted values are `Moderate`, `Severe` and `Extreme`.
+- `acc`: Accumulation period of the standardised indicator. The default is `3`.
 
 For example:
 
 ```python
 extract_transitions(
-    'example_ssi_69007.csv',
-    'Moderate',
+    model="GR4J",
+    rcm="RCM1",
+    threshold="Moderate",
     acc=3
 )
 ```
-To run the script directly:
-`python identify_characterise_transitions.py`
 
-This example identifies `moderate` transitions using `SSI-3` for the selected catchment data.
+This example identifies moderate transitions using SSI-3 for the selected hydrological model and regional climate model simulation.
+
+## Applying the method to SSI and SPI
+
+The same conceptual method is applied to both indicators:
+
+- **SSI transitions** represent changes between hydrological dry and wet extremes in standardised streamflow.
+- **SPI transitions** represent changes between meteorological dry and wet extremes in standardised precipitation.
+
+The attached script currently uses SSI-specific variable names, directory names and output filenames. To apply it to SPI, these elements should be generalised or replaced with the corresponding SPI names.
+
+The threshold definitions and transition metrics remain the same because both SSI and SPI are standardised indicators.
 
 ## Outputs
 
-The script writes two CSV files to the `output_data/` directory for each run.
-
 ### Event-level output
 
-The event-level filename follows this format:
+A separate CSV file is produced for each catchment, threshold, model, accumulation period and climate simulation combination.
 
-```text
-<input_filename>_TransitionsEvents.csv
-```
-
-For example:
-
-```text
-example_ssi_69007_TransitionsEvents.csv
-```
-
-It contains:
+The event-level output contains:
 
 ```text
 StartDates
@@ -174,23 +198,18 @@ Duration
 Intensity
 ```
 
+An example output filename is:
+
+```text
+Transitions_SSI3_Moderate_GR4J_69007.csv
+```
+
 ### Summary output
 
-The summary filename follows this format:
+The script also creates a summary CSV containing catchment-level transition characteristics:
 
 ```text
-<input_filename>_TransitionsSummary.csv
-```
-
-For example:
-
-```text
-example_ssi_69007_TransitionsSummary.csv
-```
-
-It contains:
-
-```text
+Station
 Magnitude
 Duration
 Intensity
@@ -198,80 +217,72 @@ Frequency
 Count
 ```
 
-The summary fields represent:
+These fields represent:
 
-- `Magnitude`: mean transition magnitude
-- `Duration`: mean transition duration in months
-- `Intensity`: mean transition intensity
-- `Frequency`: number of transitions per decade
-- `Count`: total number of transitions identified
+- Mean transition magnitude
+- Mean transition duration
+- Mean transition intensity
+- Transition frequency per decade
+- Total number of transitions
 
+Station metadata are joined to the summary output using the station identifier.
+
+An example summary filename is:
+
+```text
+TransitionsSummary_SSI3_Moderate_GR4J_RCM1.csv
+```
 
 ## Important considerations
 
 ### Consecutive extremes
 
-A transition is recorded when two consecutive extreme events in the chronological event sequence have opposite states. Consecutive extremes of the same type do not form a transition.
+A transition is identified only when consecutive events in the combined chronological sequence have different states. Multiple wet extremes followed by a dry extreme therefore produce a transition from the final wet extreme to the subsequent dry extreme.
 
-### Duration and intensity
+### Duration
 
-Duration is calculated in whole months between the start and end extreme events. Intensity is calculated by dividing magnitude by duration.
+Duration is calculated in whole months. Because intensity is calculated as magnitude divided by duration, users should check for zero-duration transitions if applying the workflow to data with a temporal resolution finer than monthly.
 
-The workflow is intended for monthly data. Users adapting the script to other temporal resolutions should check the duration calculation and guard against zero-duration transitions.
+### Input column names
 
-### Input format
+The current script assumes that:
 
-The script currently assumes:
+- The date column is named `Unnamed: 0`.
+- Indicator columns use names such as `X3`.
+- Input filenames follow the eFLaG naming convention.
+- The station number can be extracted from a fixed part of the filename.
 
-- monthly data;
-- a date column named `Unnamed: 0`;
-- accumulation columns named `X1`, `X3`, `X6`, etc.;
-- the requested accumulation column is present in the input file.
+These assumptions may need to be changed for other datasets.
 
-Alternative formats require corresponding changes to the data-import section.
+### Output directories
 
-### Output directory
-
-The `output_data/` directory must exist before running the script because the current implementation does not create it automatically.
+The script does not create missing output directories automatically. Required folders should therefore be created before execution.
 
 ### Station and flow-record information
 
-Users should review the NRFA information for station 69007 before interpreting the SSI demonstration. The station record includes information about measurement changes and factors affecting runoff.
+Users applying the demonstration data should review the NRFA information for station 69007. The station record includes qualifications relating to high flows, measurement changes and the influence of reservoirs and flood-storage basins. These factors should be considered when interpreting streamflow-based extremes and transitions.
 
 ## Reproducibility
 
-For reproducible analyses, record:
+For reproducible use, record the following information alongside each analysis:
 
-- indicator type, SSI or SPI;
-- accumulation period;
-- threshold classification;
-- input dataset source and version;
-- record start and end dates;
-- missing-data treatment;
-- Python version;
-- package versions;
-- date of analysis.
+- Indicator used, such as SSI or SPI
+- Accumulation period
+- Threshold classification
+- Input data source and version
+- Record start and end dates
+- Any missing-data treatment
+- Hydrological model, where applicable
+- Climate simulation, where applicable
+- Python and package versions
+- Date on which the analysis was run
 
 ## Citation
 
-If you use this repository, please cite the software using the citation information provided in the repository's `CITATION.cff` file or associated publication.
-
-A suggested placeholder citation is:
-
+If you use this repository, please cite the software using the citation below:
 ```text
-Armitage, R. (2026). Hydroclimatic transition event identification and
-characterisation. GitHub repository.
+Armitage R, Magee E, Chevuturi A, Chan W, Hannaford J (2026) Hydroclimatic transition event identification and characterisation. GitHub repository link.
 ```
-
-Update this citation with the final repository URL, software version, DOI and contributor information when these become available.
-
-## Authors and contributors
-
-Original script author:
-
-- Rachael Armitage
-
-Additional contributors and maintainers should be listed here or in the repository metadata.
 
 ## Licence
 

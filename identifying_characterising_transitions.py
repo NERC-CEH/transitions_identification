@@ -9,8 +9,8 @@
 import pandas as pd
 from os import listdir
 from pyextremes import get_extremes
-import matplotlib.pyplot as plt
-from pyextremes.plotting import plot_extremes
+#import matplotlib.pyplot as plt
+#from pyextremes.plotting import plot_extremes
 
 # define models and rcms
 models = ['GR4J','GR6J','PDM','G2G'] # models in eflag
@@ -24,8 +24,8 @@ Severe = 1.6
 Extreme = 2
 
 # set paths
-inpath = 'input_data/SSI/' # location of standardised data directory
-outpath_t = 'output_data/SSI/TransitionEventsData/' # location to save transitions data to
+inpath = 'input_data/' # location of standardised data directory
+outpath_t = 'output_data/' # location to save transitions data to
 eflag_metadata_path = 'input_data/eflag_lat_long_69007.csv'
 
 

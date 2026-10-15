@@ -2,9 +2,6 @@
 
 Python tool for identifying and characterising transitions between dry and wet hydrological and meteorological extremes using standardised indicators. The methods demonstrated in this repository are linked to the analyses presented in Historical and future transitions between opposing UK hydrological extremes ([Armitage et al., 2026](https://doi.org/10.5194/egusphere-2026-3154)), which uses threshold-based identification of consecutive dry and wet extremes to characterise hydroclimatic transition events. The workflow identifies transitions from a dry extreme to a wet extreme, or from a wet extreme to a dry extreme, and calculates the magnitude, duration, intensity and frequency of the identified transition events.
 
-**Citation:**
-*Armitage R, Magee E, Chevuturi A, Chan W, Hannaford J (2026) Historical and future transitions between opposing UK hydrological extremes. [https://doi.org/10.5194/egusphere-2026-3154](https://doi.org/10.5194/egusphere-2026-3154).*
-
 Schematic below demonstrates visually how the workflow identifies the extreme events and transitions. Extreme events over the given threshold (dashed grey line) comprising a transition are denoted by solid red markers, whilst extreme events discounted from transition identification are shown by hollow red markers. Shaded red periods represent a wet-dry transition and shaded blue periods a dry-wet transition.  
 
 <img width="1465" height="727" alt="image" src="https://github.com/user-attachments/assets/4d1e3029-cf6a-46b7-bb70-179b1fb38d45" />
@@ -143,38 +140,6 @@ The main function is:
 extract_transitions(filename, threshold, acc=3)
 ```
 
-or run the script directly with changes as needed:
-
-```python 
-extract_transitions(filename, threshold, acc=3)
-```
-
-### Parameters
-
-- `filename`: Name of the input SSI or SPI CSV file located in `input_data/`.
-- `threshold`: Transition severity classification. Accepted values are `Moderate`, `Severe`, and `Extreme`.
-- `acc`: Accumulation period of the standardised indicator. The default is `3`.
-
-
-```text
-outputs/
-└── TransitionEventsData/
-    ├── Moderate/
-    │   └── SSI3/
-    ├── Severe/
-    │   └── SSI3/
-    └── Extreme/
-        └── SSI3/
-```
-
-## Running the transition extraction
-
-The main function has the following form:
-
-```python 
-extract_transitions(model, rcm, threshold, acc=3)
-```
-
 ### Parameters
 
 - `filename`: Name of the input SSI or SPI CSV file located in `input_data/`.
@@ -289,9 +254,7 @@ Users should review the NRFA information for station 69007 before interpreting t
 If you use this repository, please cite the associated study:
 
 ```text
-Armitage, R., Magee, E., Chevuturi, A., Chan, W., and Hannaford, J. (2026).
-Historical and future transitions between opposing UK hydrological extremes.
-HESS, https://doi.org/10.5194/egusphere-2026-3154
+Armitage R, Magee E, Chevuturi A, Chan W, Hannaford J (2026) Historical and future transitions between opposing UK hydrological extremes. HESS, [https://doi.org/10.5194/egusphere-2026-3154](https://doi.org/10.5194/egusphere-2026-3154).
 ```
 
 ## Licence
@@ -301,3 +264,6 @@ This project is distributed under the terms of the GNU General Public License.
 See the `LICENSE` file for the complete licence terms.
 
 ## Acknowledgements
+
+This research was funded by the Natural Environment Research Council CANARI project (NE/W004984/1), and the CoCentre for Climate + Biodiversity + Water programme (NE/Y006496/1) funded by Science Foundation Ireland (SFI), Northern
+Ireland’s Department of Agriculture, Environment and Rural Affairs (DAERA) and UK Research and Innovation (UKRI).

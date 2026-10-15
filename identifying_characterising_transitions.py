@@ -19,8 +19,6 @@ Extreme = 2
 # set paths
 inpath = 'input_data/' # location of standardised data directory
 outpath_t = 'output_data/' # location to save transitions data to
-eflag_metadata_path = 'input_data/eflag_lat_long_69007.csv'
-
 
 ### transition identification and characterisation ###
 

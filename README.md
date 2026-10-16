@@ -250,7 +250,7 @@ The `output_data/` directory must exist before running the script because the cu
 If you use this repository, please cite the associated study:
 
 ```text
-Armitage R, Magee E, Chevuturi A, Chan W, Hannaford J (2026) Historical and future transitions between opposing UK hydrological extremes. HESS, [https://doi.org/10.5194/egusphere-2026-3154](https://doi.org/10.5194/egusphere-2026-3154).
+Armitage R, Magee E, Chevuturi A, Chan W, Hannaford J (2026) Historical and future transitions between opposing hydrological and meteorological extremes in the UK. Hydrology and Earth System Sciences, [https://doi.org/10.5194/egusphere-2026-3154](https://doi.org/10.5194/egusphere-2026-3154).
 ```
 
 ## Licence
